@@ -1,0 +1,808 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Encyclopédie Dofus perso</title>
+<style>
+:root{
+  --bg:#f6f5f2; --panel:#ffffff; --panel2:#f0eee9; --text:#1f2328; --muted:#646a73; --border:#dedbd4;
+  --accent:#2f6f5e; --accent-soft:#e0efe9; --warn:#a2581b; --warn-soft:#f8eadd; --bad:#b03a3a; --bad-soft:#f7e3e3;
+  --star:#d39b10; --link:#2a5db0; --bar:#2f6f5e; --shadow:0 1px 2px rgba(0,0,0,.06);
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15171a; --panel:#1d2024; --panel2:#25292e; --text:#e6e6e3; --muted:#9aa0a8; --border:#33383e;
+    --accent:#62b39b; --accent-soft:#1f3530; --warn:#e0a060; --warn-soft:#3a2b1d; --bad:#e07a7a; --bad-soft:#3a2224;
+    --star:#f0c040; --link:#7fa8ec; --bar:#62b39b; --shadow:none; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15171a; --panel:#1d2024; --panel2:#25292e; --text:#e6e6e3; --muted:#9aa0a8; --border:#33383e;
+  --accent:#62b39b; --accent-soft:#1f3530; --warn:#e0a060; --warn-soft:#3a2b1d; --bad:#e07a7a; --bad-soft:#3a2224;
+  --star:#f0c040; --link:#7fa8ec; --bar:#62b39b; --shadow:none; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+a{color:var(--link);text-decoration:none} a:hover{text-decoration:underline}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:5px 10px}
+button:hover{border-color:var(--accent)}
+button.on{background:var(--accent);border-color:var(--accent);color:#fff}
+input[type=search],input[type=number],select,textarea{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:5px 8px;min-width:0}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:5}
+header h1{font-size:16px;margin:0;white-space:nowrap}
+.seg{display:inline-flex;border:1px solid var(--border);border-radius:7px;overflow:hidden}
+.seg button{border:0;border-radius:0;border-right:1px solid var(--border)}
+.seg button:last-child{border-right:0}
+.seg button:disabled{opacity:.4;cursor:not-allowed}
+.spacer{flex:1}
+.layout{display:grid;grid-template-columns:240px minmax(0,1fr) minmax(0,460px);gap:0;height:calc(100vh - 53px)}
+aside.filters{padding:12px 14px;border-right:1px solid var(--border);overflow:auto;background:var(--panel)}
+.filters label.f{display:block;font-size:12px;color:var(--muted);margin:10px 0 3px}
+.filters select,.filters input[type=search]{width:100%}
+.row{display:flex;gap:6px;align-items:center}
+.row input[type=number]{width:70px}
+.check{display:flex;gap:6px;align-items:center;margin:4px 0;cursor:pointer}
+main{overflow:auto;padding:10px 14px}
+.toolbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.count{color:var(--muted);font-size:13px}
+.list{display:flex;flex-direction:column;gap:2px}
+.item{display:grid;grid-template-columns:36px minmax(0,1fr) auto;gap:10px;align-items:center;padding:5px 8px;border-radius:6px;cursor:pointer;border:1px solid transparent}
+.item:hover{background:var(--panel2)}
+.item.sel{background:var(--accent-soft);border-color:var(--accent)}
+.item .nm{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .sub{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.item .right{display:flex;gap:6px;align-items:center;font-size:12px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.grid .item{grid-template-columns:1fr;justify-items:center;text-align:center;background:var(--panel);border-color:var(--border);padding:10px 6px}
+.grid .item .nm{white-space:normal;font-size:13px}
+.grid .item .right{justify-content:center}
+.ic{width:36px;height:36px;object-fit:contain;border-radius:6px;background:var(--panel2);flex:none}
+.ic.big{width:72px;height:72px}
+.ic.sm{width:24px;height:24px}
+.grid .ic{width:56px;height:56px}
+.ph{display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:var(--muted);border:1px dashed var(--border)}
+.badge{display:inline-block;font-size:11px;padding:1px 6px;border-radius:9px;background:var(--panel2);color:var(--muted);white-space:nowrap}
+.badge.hid{background:var(--warn-soft);color:var(--warn)}
+.badge.pnj{background:var(--accent-soft);color:var(--accent)}
+.badge.leg{background:var(--bad-soft);color:var(--bad)}
+.badge.score{font-variant-numeric:tabular-nums}
+.badge.new{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.pot{margin:6px 0;padding:6px 8px;border-radius:6px;background:var(--panel2)}
+.pot .meta{display:block;font-size:12px}
+.mkrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.mk{display:flex;flex-direction:column;font-size:12px;color:var(--muted);flex:1;min-width:110px}
+.mk input{margin-top:2px;width:100%}
+.cmpdiff{border-collapse:collapse;font-size:12px;margin:4px 0 8px}
+.cmpdiff th,.cmpdiff td{padding:2px 8px;border-bottom:1px solid var(--border);text-align:left}
+.cmpdiff td+td,.cmpdiff th+th{text-align:right;font-variant-numeric:tabular-nums}
+.star{border:0;background:none;padding:0 2px;font-size:17px;line-height:1;color:var(--muted)}
+.star.on{color:var(--star)}
+.pager{display:flex;gap:6px;align-items:center;justify-content:center;margin:12px 0}
+section.detail{border-left:1px solid var(--border);overflow:auto;background:var(--panel);padding:14px 16px}
+.detail h2{font-size:18px;margin:0 0 2px}
+.detail h3{font-size:13px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:18px 0 6px;border-bottom:1px solid var(--border);padding-bottom:3px}
+.dhead{display:flex;gap:12px;align-items:flex-start}
+.meta{color:var(--muted);font-size:13px}
+.empty{color:var(--muted);font-style:italic}
+table{border-collapse:collapse;width:100%;font-size:13px}
+td,th{padding:4px 6px;border-bottom:1px solid var(--border);text-align:left;vertical-align:middle}
+th{font-weight:600;color:var(--muted);font-size:12px}
+td.num,th.num{text-align:right;font-variant-numeric:tabular-nums}
+.ing{display:flex;gap:8px;align-items:center}
+ul.plain{margin:0;padding-left:18px}
+.bars{display:grid;grid-template-columns:80px 1fr 42px;gap:4px 8px;align-items:center;font-size:12px}
+.bar{height:8px;background:var(--panel2);border-radius:4px;overflow:hidden}
+.bar>i{display:block;height:100%;background:var(--bar)}
+.why{font-size:13px;background:var(--panel2);border-radius:6px;padding:6px 8px;margin-top:8px}
+.verdict button{padding:3px 10px}
+.verdict button.on.rare{background:var(--warn);border-color:var(--warn)}
+.verdict button.on.commun{background:var(--muted);border-color:var(--muted)}
+textarea{width:100%;min-height:70px;resize:vertical}
+code{font-size:12px;background:var(--panel2);padding:1px 4px;border-radius:4px;word-break:break-all}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.close{display:none}
+.notice{background:var(--warn-soft);color:var(--warn);padding:8px 10px;border-radius:6px;margin:8px 0;font-size:13px}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:2px 10px;font-size:13px}
+.kv dt{color:var(--muted)} .kv dd{margin:0;word-break:break-word}
+.filtersToggle{display:none}
+@media (max-width:1100px){
+  .layout{grid-template-columns:220px minmax(0,1fr)}
+  section.detail{position:fixed;inset:53px 0 0 auto;width:min(520px,100%);z-index:10;box-shadow:-4px 0 18px rgba(0,0,0,.18);display:none}
+  section.detail.open{display:block}
+  .close{display:inline-block;float:right}
+}
+@media (max-width:700px){
+  header{padding:8px 16px}
+  .layout{grid-template-columns:1fr;height:auto}
+  aside.filters{display:none;border-right:0;border-bottom:1px solid var(--border)}
+  aside.filters.open{display:block}
+  .filtersToggle{display:inline-block}
+  main{padding:10px 16px;overflow:visible}
+  section.detail{inset:0;width:100%;top:0}
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>Encyclopédie Dofus</h1>
+  <div class="seg" id="versions" role="tablist" aria-label="Version"></div>
+  <div class="seg" id="kinds">
+    <button data-kind="e" class="on">Équipements</button>
+    <button data-kind="r">Ressources</button>
+  </div>
+  <span class="spacer"></span>
+  <button id="btnExport" title="Télécharger favoris, notes et verdicts (JSON)">Exporter</button>
+  <button id="btnImport" title="Fusionner un fichier exporté">Importer</button>
+  <input type="file" id="fileImport" accept="application/json,.json" hidden>
+  <button id="btnTheme" title="Thème">Thème : auto</button>
+</header>
+<div class="layout">
+  <aside class="filters" id="filters"></aside>
+  <main>
+    <div class="toolbar">
+      <button class="filtersToggle" id="btnFilters">Filtres</button>
+      <input type="search" id="q" placeholder="Rechercher (nom, ingrédient…)" style="flex:1;min-width:180px" autocomplete="off">
+      <select id="sort" aria-label="Tri"></select>
+      <div class="seg"><button id="vList" class="on" title="Liste">Liste</button><button id="vGrid" title="Grille">Grille</button></div>
+    </div>
+    <div class="count" id="count"></div>
+    <div id="notice"></div>
+    <div id="results" class="list"></div>
+    <div class="pager" id="pager"></div>
+  </main>
+  <section class="detail" id="detail"><p class="empty">Sélectionne un objet pour voir sa fiche.</p></section>
+</div>
+
+<script src="data/index.js"></script>
+<script>
+"use strict";
+/* ---------- utilitaires ---------- */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s ?? "").normalize("NFKD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/[^a-z0-9]+/g," ").trim();
+const fmtRate = r => r == null ? "?" : (r === 0 ? "0 %" : (r < 1 ? r.toFixed(r < 0.1 ? 3 : 2) : (+r.toFixed(1))) + " %");
+function lsGet(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ return false; } }
+
+function icon(url, name, cls){
+  const ini = esc((String(name||"?").match(/[A-Za-zÀ-ÿ0-9]/g)||["?"]).slice(0,2).join("").toUpperCase());
+  if(!url) return `<span class="ic ph ${cls||""}">${ini}</span>`;
+  return `<img class="ic ${cls||""}" src="${esc(url)}" alt="" loading="lazy" data-ini="${ini}" onerror="window.__icFail(this)">`;
+}
+window.__icFail = img => { const s = document.createElement("span"); s.className = img.className + " ph"; s.textContent = img.dataset.ini || "?"; s.title = "image indisponible"; img.replaceWith(s); };
+
+/* ---------- état ---------- */
+const INDEX = window.DOFUS_INDEX || {versions:[], all:[{key:"retro",label:"Rétro"},{key:"dofus2",label:"2.0"},{key:"dofus3",label:"3.0"}], cross:{}};
+const DB = {};               // version -> données préparées
+const st = {
+  v: lsGet("de.version", null), kind:"e", q:"", sort:"level", page:0, view: lsGet("de.view","list"),
+  slot:"", type:"", job:"", lmin:"", lmax:"", rtype:"", cmp:"",
+  flags:{seasonal:false,norunes:false,hidden:false,pnj:false,droponly:false,norecipe:false,fav:false,legendary:false,nosource:false},
+  sel:null
+};
+const PAGE = {list:100, grid:60};
+const PREV = {dofus3:"dofus2", dofus2:"dofus3", retro:"dofus2"};   // version de référence pour le badge "recette modifiée"
+const CMP_LABEL = {absent:"absent", identique:"recette identique", quantites:"mêmes ingrédients, quantités différentes", differente:"ingrédients différents", pas_de_recette:"pas de recette d'un côté"};
+const vlabel = k => (INDEX.all.find(x => x.key === k) || {label:k}).label;
+const USERKEY = "de.user.v1";
+let USER = lsGet(USERKEY, {}) || {};
+const ukey = (v,kind,id) => `${v}:${kind}:${id}`;
+const uget = (v,kind,id) => USER[ukey(v,kind,id)] || {};
+function uset(v,kind,id,patch){
+  const k = ukey(v,kind,id), cur = Object.assign({}, USER[k], patch, {updated:new Date().toISOString()});
+  const d = DB[v], obj = d && (kind==="e" ? d.eqById : d.resById).get(String(id));
+  if(obj) cur.name = obj.name;
+  if(!cur.fav && !cur.note && !cur.verdict && !cur.coef && !cur.buy && !cur.runes) delete USER[k]; else USER[k] = cur;
+  if(!lsSet(USERKEY, USER)) showNotice("Impossible d'enregistrer dans le navigateur (localStorage indisponible) : pense à exporter.");
+}
+
+/* ---------- chargement des versions ---------- */
+function loadVersion(v){
+  return new Promise((res, rej) => {
+    if(DB[v]) return res(DB[v]);
+    if(window.DOFUS_DATA && window.DOFUS_DATA[v]) return res(prepare(v));
+    const s = document.createElement("script");
+    s.src = `data/${v}.js`;
+    s.onload = () => window.DOFUS_DATA && window.DOFUS_DATA[v] ? res(prepare(v)) : rej(new Error("données absentes"));
+    s.onerror = () => rej(new Error(`data/${v}.js introuvable — lance python3 ui/build.py`));
+    document.head.appendChild(s);
+  });
+}
+
+function prepare(v){
+  const raw = window.DOFUS_DATA[v];
+  const d = {key:v, label:raw.label, built:raw.built, dblink:raw.dblink, eq:raw.equipments||[], res:raw.resources||[],
+             rarity:raw.rarity||{}, hidden:raw.hidden||{}, eqById:new Map(), resById:new Map(), usedBy:new Map(), usedByRes:new Map()};
+  for(const r of d.res) d.resById.set(String(r.id), r);
+  for(const e of d.eq){
+    d.eqById.set(String(e.id), e);
+    const rec = e.recipe, ings = (rec && rec.ingredients) || [];
+    const src = e.sources || {};
+    const rar = d.rarity[String(e.id)];
+    e._rar = rar || null;
+    e._score = rar && typeof rar.score === "number" ? rar.score : -1;
+    e._pot = rar && typeof rar.potentiel === "number" ? rar.potentiel : -Infinity;
+    e._season = (rar && rar.saison) || "";
+    e._norunes = !!rar && rar.poids_runes === 0;
+    e._hidden = !!(e.secret_recipe || (e.recipe_conditions||[]).length || d.hidden[String(e.id)]);
+    e._pnj = !!(src.npc_shop||[]).length;
+    e._drops = (src.drops||[]).length;
+    e._norec = !rec || !ings.length;
+    e._droponly = e._norec && e._drops > 0 && !e._pnj && !src.quests;
+    const cmp = e.cmp || {}, cv = Object.keys(cmp);
+    e._new = cv.length > 0 && cv.every(k => cmp[k].status === "absent");
+    const pc = cmp[PREV[v]];
+    e._changed = !!pc && (pc.status === "differente" || pc.status === "quantites");
+    e._s = norm(e.name) + " | " + ings.map(i => norm(i.name)).join(" | ") + " | " + norm(e.set_name||"");
+    e._n = norm(e.name);
+    for(const i of ings){
+      const k = String(i.id);
+      if(!d.usedBy.has(k)) d.usedBy.set(k, []);
+      d.usedBy.get(k).push({e, q:i.quantity});
+    }
+  }
+  for(const r of d.res){
+    const ings = (r.recipe && r.recipe.ingredients) || [];
+    r._n = norm(r.name);
+    r._s = r._n + " | " + ings.map(i => norm(i.name)).join(" | ");
+    const s = r.sources || {};
+    r._nosrc = !(s.drops||[]).length && !(s.harvest_subareas||[]).length && !s.craft && !(s.npc_shop||[]).length && !s.quests && !(r.recipe && ings.length);
+    for(const i of ings){
+      const k = String(i.id);
+      if(!d.usedByRes.has(k)) d.usedByRes.set(k, []);
+      d.usedByRes.get(k).push({r, q:i.quantity});
+    }
+  }
+  d.slots = [...new Set(d.eq.map(e => e.slot).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  d.types = [...new Set(d.eq.map(e => e.type).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  d.jobs = [...new Set(d.eq.map(e => e.recipe && e.recipe.job).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  d.rtypes = [...new Set(d.res.map(r => r.type).filter(Boolean))].sort((a,b)=>a.localeCompare(b,"fr"));
+  d.hasRarity = Object.keys(d.rarity).length > 0;
+  DB[v] = d;
+  return d;
+}
+
+/* ---------- en-tête ---------- */
+function renderVersions(){
+  const avail = new Set(INDEX.versions.map(x => x.key));
+  $("#versions").innerHTML = INDEX.all.map(x => {
+    const m = INDEX.versions.find(y => y.key === x.key);
+    const t = m ? `${m.n_eq} équipements, ${m.n_res} ressources` : "pas encore de données";
+    return `<button data-v="${x.key}" class="${x.key===st.v?"on":""}" ${avail.has(x.key)?"":"disabled"} title="${t}">${esc(x.label)}</button>`;
+  }).join("");
+}
+$("#versions").addEventListener("click", ev => { const b = ev.target.closest("button[data-v]"); if(b && !b.disabled) switchVersion(b.dataset.v); });
+$("#kinds").addEventListener("click", ev => {
+  const b = ev.target.closest("button[data-kind]"); if(!b) return;
+  st.kind = b.dataset.kind; st.page = 0;
+  [...$("#kinds").children].forEach(x => x.classList.toggle("on", x === b));
+  renderFilters(); renderList();
+});
+
+async function switchVersion(v, then){
+  st.v = v; lsSet("de.version", v); renderVersions();
+  $("#results").innerHTML = `<p class="empty">Chargement de ${esc(v)}…</p>`;
+  try{ await loadVersion(v); }
+  catch(e){ $("#results").innerHTML = `<p class="notice">${esc(e.message)}</p>`; return; }
+  st.page = 0; st.slot = st.type = st.job = st.rtype = "";
+  renderFilters(); renderList();
+  if(then) then(); else if(!location.hash.startsWith(`#/${v}/`)) showEmptyDetail();
+}
+
+/* ---------- filtres ---------- */
+function opts(list, cur, all){ return `<option value="">${all}</option>` + list.map(x => `<option ${x===cur?"selected":""}>${esc(x)}</option>`).join(""); }
+function cmpOpts(v, cur){
+  const o = [["","Tout"],["new","Nouveau dans cette version (absent ailleurs)"]];
+  for(const x of INDEX.all) if(x.key !== v) for(const s of ["absent","identique","quantites","differente"]) o.push([`${x.key}:${s}`, `${x.label} : ${CMP_LABEL[s]}`]);
+  return o.map(([k,l]) => `<option value="${k}" ${k===cur?"selected":""}>${esc(l)}</option>`).join("");
+}
+function renderFilters(){
+  const d = DB[st.v]; if(!d) return;
+  const F = st.flags;
+  const ck = (k, label, title) => `<label class="check" title="${esc(title||"")}"><input type="checkbox" data-flag="${k}" ${F[k]?"checked":""}> ${label}</label>`;
+  if(st.kind === "e"){
+    $("#filters").innerHTML = `
+      <label class="f">Emplacement</label><select id="fSlot">${opts(d.slots, st.slot, "Tous")}</select>
+      <label class="f">Type</label><select id="fType">${opts(d.types, st.type, "Tous")}</select>
+      <label class="f">Niveau</label>
+      <div class="row"><input type="number" id="fLmin" placeholder="min" min="0" max="200" value="${esc(st.lmin)}"> à <input type="number" id="fLmax" placeholder="max" min="0" max="200" value="${esc(st.lmax)}"></div>
+      <label class="f">Métier</label><select id="fJob">${opts(d.jobs, st.job, "Tous")}</select>
+      <label class="f">Comparaison avec les autres versions</label><select id="fCmp">${cmpOpts(st.v, st.cmp)}</select>
+      ${d.hasRarity ? `<label class="f">Masqués par défaut</label>
+      ${ck("seasonal","Afficher les objets saisonniers (Nowel)","ressource uniquement obtenable dans une zone saisonnière")}
+      ${ck("norunes","Afficher les objets sans stats (non brisables)","aucune caractéristique qui donne des runes")}` : ""}
+      <label class="f">Obtention</label>
+      ${ck("hidden","Recette cachée / conditionnée","secret_recipe, recipe_conditions non vides, ou présente dans hidden_recipes.json")}
+      ${ck("pnj","Échange PNJ")}
+      ${ck("droponly","Drop uniquement","pas de recette, au moins un drop, ni PNJ ni quête")}
+      ${ck("norecipe","Pas de recette")}
+      ${ck("legendary","Légendaire")}
+      ${ck("fav","★ Favoris seulement")}
+      <p style="margin-top:14px"><button id="fReset">Réinitialiser</button></p>
+      <p class="meta" style="font-size:12px">Données ${esc(d.label)} générées le ${esc(d.built||"?")}.${d.hasRarity?"":" Pas de score de rareté pour cette version."}</p>`;
+  } else {
+    $("#filters").innerHTML = `
+      <label class="f">Type de ressource</label><select id="fRtype">${opts(d.rtypes, st.rtype, "Tous")}</select>
+      <label class="f">Niveau</label>
+      <div class="row"><input type="number" id="fLmin" placeholder="min" value="${esc(st.lmin)}"> à <input type="number" id="fLmax" placeholder="max" value="${esc(st.lmax)}"></div>
+      <label class="f">Filtres</label>
+      ${ck("nosource","Aucune source connue")}
+      ${ck("fav","★ Favoris seulement")}
+      <p style="margin-top:14px"><button id="fReset">Réinitialiser</button></p>`;
+  }
+  const sorts = st.kind === "e"
+    ? [["level","Niveau ↑"],["level-desc","Niveau ↓"],["name","Nom"],["score","Score de rareté ↓"],["potentiel","Potentiel (marge estimée) ↓"]]
+    : [["level","Niveau ↑"],["level-desc","Niveau ↓"],["name","Nom"],["used","Utilisations ↑ (plus obscures)"],["used-desc","Utilisations ↓"]];
+  if(!sorts.some(s => s[0] === st.sort)) st.sort = "level";
+  $("#sort").innerHTML = sorts.map(([k,l]) => `<option value="${k}" ${k===st.sort?"selected":""}>${l}</option>`).join("");
+}
+$("#filters").addEventListener("change", ev => {
+  const t = ev.target;
+  if(t.dataset.flag) st.flags[t.dataset.flag] = t.checked;
+  else if(t.id === "fSlot") st.slot = t.value;
+  else if(t.id === "fType") st.type = t.value;
+  else if(t.id === "fJob") st.job = t.value;
+  else if(t.id === "fCmp") st.cmp = t.value;
+  else if(t.id === "fRtype") st.rtype = t.value;
+  st.page = 0; renderList();
+});
+$("#filters").addEventListener("input", ev => {
+  if(ev.target.id === "fLmin"){ st.lmin = ev.target.value; st.page = 0; renderListDebounced(); }
+  if(ev.target.id === "fLmax"){ st.lmax = ev.target.value; st.page = 0; renderListDebounced(); }
+});
+$("#filters").addEventListener("click", ev => {
+  if(ev.target.id !== "fReset") return;
+  Object.assign(st, {slot:"",type:"",job:"",rtype:"",lmin:"",lmax:"",cmp:"",page:0});
+  for(const k in st.flags) st.flags[k] = false;
+  renderFilters(); renderList();
+});
+$("#sort").addEventListener("change", ev => { st.sort = ev.target.value; st.page = 0; renderList(); });
+let qT; $("#q").addEventListener("input", ev => { st.q = ev.target.value; st.page = 0; clearTimeout(qT); qT = setTimeout(renderList, 120); });
+let lT; function renderListDebounced(){ clearTimeout(lT); lT = setTimeout(renderList, 200); }
+$("#btnFilters").addEventListener("click", () => $("#filters").classList.toggle("open"));
+function setView(v){ st.view = v; lsSet("de.view", v); $("#vList").classList.toggle("on", v==="list"); $("#vGrid").classList.toggle("on", v==="grid"); st.page = 0; renderList(); }
+$("#vList").addEventListener("click", () => setView("list"));
+$("#vGrid").addEventListener("click", () => setView("grid"));
+
+/* ---------- liste ---------- */
+function filtered(){
+  const d = DB[st.v]; if(!d) return [];
+  const words = norm(st.q).split(" ").filter(Boolean);
+  const lmin = st.lmin === "" ? -Infinity : +st.lmin, lmax = st.lmax === "" ? Infinity : +st.lmax;
+  const F = st.flags;
+  let out;
+  if(st.kind === "e"){
+    out = d.eq.filter(e => {
+      if(st.slot && e.slot !== st.slot) return false;
+      if(st.type && e.type !== st.type) return false;
+      if(st.job && !(e.recipe && e.recipe.job === st.job)) return false;
+      if(e.level < lmin || e.level > lmax) return false;
+      if(st.cmp === "new" && !e._new) return false;
+      if(st.cmp && st.cmp !== "new"){ const [cv, cs] = st.cmp.split(":"); if(((e.cmp||{})[cv]||{}).status !== cs) return false; }
+      if(!F.seasonal && e._season) return false;
+      if(!F.norunes && e._norunes) return false;
+      if(F.hidden && !e._hidden) return false;
+      if(F.pnj && !e._pnj) return false;
+      if(F.droponly && !e._droponly) return false;
+      if(F.norecipe && !e._norec) return false;
+      if(F.legendary && !e.legendary) return false;
+      if(F.fav && !uget(st.v,"e",e.id).fav) return false;
+      for(const w of words) if(!e._s.includes(w)) return false;
+      return true;
+    });
+  } else {
+    out = d.res.filter(r => {
+      if(st.rtype && r.type !== st.rtype) return false;
+      if((r.level ?? 0) < lmin || (r.level ?? 0) > lmax) return false;
+      if(F.nosource && !r._nosrc) return false;
+      if(F.fav && !uget(st.v,"r",r.id).fav) return false;
+      for(const w of words) if(!r._s.includes(w)) return false;
+      return true;
+    });
+  }
+  const byName = (a,b) => a.name.localeCompare(b.name,"fr");
+  const cmp = {
+    "level": (a,b) => (a.level-b.level) || byName(a,b),
+    "level-desc": (a,b) => (b.level-a.level) || byName(a,b),
+    "name": byName,
+    "score": (a,b) => (b._score-a._score) || byName(a,b),
+    "potentiel": (a,b) => (b._pot-a._pot) || byName(a,b),
+    "used": (a,b) => ((a.used_in_equipment_recipes??0)-(b.used_in_equipment_recipes??0)) || byName(a,b),
+    "used-desc": (a,b) => ((b.used_in_equipment_recipes??0)-(a.used_in_equipment_recipes??0)) || byName(a,b),
+  }[st.sort] || byName;
+  // une recherche exacte sur le nom passe devant
+  if(words.length){
+    const q = norm(st.q);
+    return out.sort((a,b) => ((b._n===q)-(a._n===q)) || ((b._n.includes(q))-(a._n.includes(q))) || cmp(a,b));
+  }
+  return out.sort(cmp);
+}
+
+function renderList(){
+  const d = DB[st.v]; if(!d) return;
+  const all = filtered(), size = PAGE[st.view], pages = Math.max(1, Math.ceil(all.length/size));
+  if(st.page >= pages) st.page = pages - 1;
+  const slice = all.slice(st.page*size, (st.page+1)*size);
+  const label = st.kind === "e" ? "équipement" : "ressource";
+  $("#count").textContent = `${all.length} ${label}${all.length>1?"s":""}` + (pages>1 ? ` — page ${st.page+1}/${pages}` : "");
+  const box = $("#results");
+  box.className = st.view === "grid" ? "grid" : "list";
+  if(!slice.length){ box.innerHTML = `<p class="empty">Aucun résultat.</p>`; $("#pager").innerHTML = ""; return; }
+  const k = st.kind;
+  box.innerHTML = slice.map(x => {
+    const u = uget(st.v, k, x.id);
+    const sel = st.sel && st.sel.kind===k && String(st.sel.id)===String(x.id) ? " sel" : "";
+    let badges = "";
+    if(k === "e"){
+      if(x._season) badges += `<span class="badge leg" title="saisonnier">${esc(x._season)}</span>`;
+      if(x._norunes) badges += `<span class="badge" title="ne donne pas de runes">sans stats</span>`;
+      const mk = market(x);
+      if(mk.coef) badges += `<span class="badge new" title="taux de brisage relevé">${esc(mk.coef)}%</span>`;
+      if(x._new) badges += `<span class="badge new" title="absent des autres versions">nouveau</span>`;
+      if(x._changed) badges += `<span class="badge" title="recette différente en ${esc(vlabel(PREV[st.v]))}">recette ≠ ${esc(vlabel(PREV[st.v]))}</span>`;
+      if(x._hidden) badges += `<span class="badge hid" title="recette cachée/conditionnée">cachée</span>`;
+      if(x._pnj) badges += `<span class="badge pnj">PNJ</span>`;
+      if(x.legendary) badges += `<span class="badge leg">légendaire</span>`;
+      if(x._norec && !x._pnj) badges += `<span class="badge">${x._drops?"drop":"sans recette"}</span>`;
+      if(x._score >= 0) badges += `<span class="badge score" title="score de rareté">${x._score.toFixed(2)}</span>`;
+      if(x._pot > -Infinity) badges += `<span class="badge score" title="marge estimée par craft + brisage" style="color:var(${x._pot >= 0 ? "--accent" : "--bad"})">${x._pot >= 0 ? "+" : ""}${kfmt(x._pot)}</span>`;
+    } else {
+      badges += `<span class="badge" title="recettes d'équipement qui l'utilisent">${x.used_in_equipment_recipes ?? "?"} rec.</span>`;
+      if(x._nosrc) badges += `<span class="badge leg">sans source</span>`;
+    }
+    if(u.verdict) badges += `<span class="badge ${u.verdict==="rare"?"hid":""}">${esc(u.verdict)}</span>`;
+    const sub = k === "e" ? `Niv. ${x.level} · ${esc(x.type)}${x.recipe&&x.recipe.job?" · "+esc(x.recipe.job):""}` : `Niv. ${x.level ?? "?"} · ${esc(x.type)}`;
+    return `<div class="item${sel}" data-id="${esc(x.id)}" role="button" tabindex="0">
+      ${icon(x.img, x.name)}
+      <div style="min-width:0"><div class="nm">${esc(x.name || "(sans nom)")}</div><div class="sub">${sub}</div></div>
+      <div class="right">${badges}<button class="star ${u.fav?"on":""}" data-star="${esc(x.id)}" title="Favori" aria-label="Favori">${u.fav?"★":"☆"}</button></div>
+    </div>`;
+  }).join("");
+  const btn = (p, l, dis) => `<button data-p="${p}" ${dis?"disabled":""}>${l}</button>`;
+  $("#pager").innerHTML = pages > 1 ? btn(0,"«",st.page===0) + btn(st.page-1,"‹ Préc.",st.page===0) + `<span class="count">${st.page+1} / ${pages}</span>` + btn(st.page+1,"Suiv. ›",st.page>=pages-1) + btn(pages-1,"»",st.page>=pages-1) : "";
+}
+$("#pager").addEventListener("click", ev => { const b = ev.target.closest("button[data-p]"); if(!b) return; st.page = +b.dataset.p; renderList(); document.querySelector("main").scrollTop = 0; window.scrollTo(0,0); });
+$("#results").addEventListener("click", ev => {
+  const s = ev.target.closest("[data-star]");
+  if(s){ ev.stopPropagation(); const id = s.dataset.star; const u = uget(st.v, st.kind, id); uset(st.v, st.kind, id, {fav:!u.fav}); renderList(); if(st.sel && st.sel.kind===st.kind && String(st.sel.id)===id) renderDetail(); return; }
+  const it = ev.target.closest(".item"); if(it) go(st.v, st.kind, it.dataset.id);
+});
+$("#results").addEventListener("keydown", ev => { if(ev.key === "Enter"){ const it = ev.target.closest(".item"); if(it) go(st.v, st.kind, it.dataset.id); } });
+
+/* ---------- navigation (hash : #/<version>/<e|r>/<id>) ---------- */
+function go(v, kind, id){ location.hash = `#/${v}/${kind}/${id}`; }
+async function onHash(){
+  const m = location.hash.match(/^#\/(\w+)\/([er])\/(.+)$/);
+  if(!m){ showEmptyDetail(); return; }
+  const [, v, kind, id] = m;
+  if(v !== st.v || !DB[v]){
+    if(!INDEX.versions.some(x => x.key === v)){ showEmptyDetail(`Version ${v} indisponible.`); return; }
+    await switchVersion(v, () => {});
+  }
+  st.sel = {kind, id:decodeURIComponent(id)};
+  renderDetail();
+  document.querySelectorAll("#results .item").forEach(n => n.classList.toggle("sel", st.kind===kind && n.dataset.id===st.sel.id));
+}
+window.addEventListener("hashchange", onHash);
+function showEmptyDetail(msg){ st.sel = null; const p = $("#detail"); p.classList.remove("open"); p.innerHTML = `<p class="empty">${esc(msg || "Sélectionne un objet pour voir sa fiche.")}</p>`; }
+
+/* ---------- fiche ---------- */
+const CARAC = {0:"",1:"PA",10:"Force",11:"Vitalité",12:"Sagesse",13:"Chance",14:"Agilité",15:"Intelligence",16:"Dommages",18:"% Critique",19:"Portée",23:"PM",25:"Puissance",26:"Invocations",40:"Pods",44:"Initiative",48:"Prospection",49:"Soins"};
+function effectsHtml(e){
+  if(Array.isArray(e.effects_text) && e.effects_text.length)
+    return `<ul class="plain">${e.effects_text.map(t => `<li>${esc(t)}</li>`).join("")}</ul>`;
+  const ef = e.effects || [];
+  if(!ef.length) return `<p class="empty">Aucun effet.</p>`;
+  return `<p class="meta" style="font-size:12px">Effets bruts (effects_text pas encore disponible) — le libellé de caractéristique est indicatif, le signe dépend de l'effectId.</p>
+    <table><tr><th>Valeurs</th><th>Carac.</th><th class="num">effectId</th></tr>${ef.map(x => {
+      const val = (x.from||x.to) ? (x.to && x.to !== x.from ? `${x.from} à ${x.to}` : `${x.from}`) : "—";
+      const c = x.characteristic <= 0 ? "(dégâts d'arme / spécial)" : (CARAC[x.characteristic] || "#" + x.characteristic);
+      return `<tr><td>${esc(val)}</td><td>${esc(c)}</td><td class="num">${esc(x.effectId)}</td></tr>`;
+    }).join("")}</table>`;
+}
+
+function nameOfId(d, id){ const x = d.eqById.get(String(id)) || d.resById.get(String(id)); return x ? x.name : null; }
+function condHtml(d, conds){
+  // interprétation approximative des critères Ankama les plus courants
+  const L = {Qa:"quête en cours",Qf:"quête terminée",Qc:"quête commençable",Qo:"objectif de quête",PO:"possède l'objet",OA:"succès",PL:"niveau",Pj:"métier",PJ:"métier",Ps:"alignement",Sc:"",SC:"",ST:""};
+  return conds.map(c => {
+    const parts = String(c).match(/[A-Za-z]{2}[=!<>~][^&|()]*/g) || [];
+    const human = parts.map(p => {
+      const m = p.match(/^([A-Za-z]{2})([=!<>~])(.*)$/); if(!m) return esc(p);
+      const [, k, op, val] = m, opL = {"=":"=","!":"≠","<":"<",">":">","~":"~"}[op];
+      let v = esc(val);
+      if(k === "PO"){ const [iid, qty] = val.split(","); const n = nameOfId(d, iid); v = (n ? `<a href="#/${d.key}/${d.eqById.has(iid)?"e":"r"}/${esc(iid)}">${esc(n)}</a>` : `objet #${esc(iid)}`) + (qty ? ` ×${esc(qty)}` : ""); }
+      return `${L[k] ? esc(L[k]) : `<code>${esc(k)}</code>`} ${opL} ${v}`;
+    });
+    return `<li><code>${esc(c)}</code>${human.length ? `<br><span class="meta">≈ ${human.join(" ; ")}</span>` : ""}</li>`;
+  }).join("");
+}
+
+function recipeHtml(d, rec){
+  if(!rec || !(rec.ingredients||[]).length) return `<p class="empty">Pas de recette.</p>`;
+  return `<p class="meta">Métier : <b>${esc(rec.job || "?")}</b> · ${rec.ingredients.length} ingrédient(s)</p>
+  <table>${rec.ingredients.map(i => {
+    const r = d.resById.get(String(i.id)) || d.eqById.get(String(i.id));
+    const kind = d.resById.has(String(i.id)) ? "r" : (d.eqById.has(String(i.id)) ? "e" : null);
+    const nm = esc(i.name || (r && r.name) || `#${i.id}`);
+    const link = kind ? `<a href="#/${d.key}/${kind}/${esc(i.id)}">${nm}</a>` : `${nm} <span class="badge leg" title="id absent de resources.json">introuvable</span>`;
+    const extra = r && kind === "r" ? `<span class="meta" style="font-size:12px">${esc(r.type||"")} · niv. ${r.level ?? "?"} · ${r.used_in_equipment_recipes ?? "?"} rec. d'équip.</span>` : "";
+    return `<tr><td class="num" style="width:44px"><b>${esc(i.quantity)}×</b></td><td><div class="ing">${icon(r && r.img, i.name, "sm")}<div>${link}<br>${extra}</div></div></td></tr>`;
+  }).join("")}</table>`;
+}
+
+function sourcesHtml(d, s){
+  s = s || {};
+  let h = "";
+  const drops = s.drops || [];
+  if(drops.length){
+    const sorted = [...drops].sort((a,b) => (b.rate??0)-(a.rate??0));
+    h += `<p class="meta"><b>Drops</b> (${drops.length})</p><table><tr><th>Monstre</th><th class="num">Niv.</th><th class="num">Taux</th><th></th></tr>` +
+      sorted.map(x => `<tr><td>${esc(x.monster || "#"+x.monster_id)}</td><td class="num">${esc(x.level ?? "")}</td><td class="num" ${x.rate===0?'title="taux 0 dans la source : probablement inconnu ou dépendant d\'une condition"':""}>${x.rate===0?"0 % ?":fmtRate(x.rate)}</td><td>${
+        [x.boss&&`<span class="badge leg">boss</span>`, x.archimonster&&`<span class="badge hid">archi</span>`, x.quest_monster&&`<span class="badge">quête</span>`, x.conditional&&`<span class="badge" title="drop conditionnel">cond.</span>`].filter(Boolean).join(" ")
+      }</td></tr>`).join("") + `</table>`;
+  }
+  const shops = s.npc_shop || [];
+  if(shops.length){
+    h += `<p class="meta"><b>Échanges PNJ</b> (${shops.length})</p><table><tr><th>PNJ</th><th>Contre</th></tr>` +
+      shops.map(x => `<tr><td>${esc(x.npc || "?")}${x.quantity>1?` <span class="meta">(×${esc(x.quantity)})</span>`:""}${x.criterion?`<br><code>${esc(x.criterion)}</code>`:""}</td><td>${
+        (x.tokens||[]).map(t => { const k = t.id!=null && d.resById.has(String(t.id)) ? "r" : (t.id!=null && d.eqById.has(String(t.id)) ? "e" : null);
+          const n = esc(t.name || "#"+t.id); return `${esc(t.quantity)}× ${k?`<a href="#/${d.key}/${k}/${esc(t.id)}">${n}</a>`:n}`; }).join("<br>") || "?"
+      }</td></tr>`).join("") + `</table>`;
+  }
+  const hv = s.harvest_subareas || [];
+  if(hv.length) h += `<p class="meta"><b>Récolte</b> : ${hv.map(esc).join(", ")}</p>`;
+  const misc = [];
+  if(s.craft) misc.push("craftable");
+  if(s.quests) misc.push(`donné par ${s.quests} quête(s)`);
+  if(s.legendary_hunt) misc.push("chasse légendaire");
+  if(misc.length) h += `<p class="meta">${misc.join(" · ")}</p>`;
+  return h || `<p class="empty">Aucune source connue.</p>`;
+}
+
+function rarityHtml(e){
+  const r = e._rar;
+  if(!r) return `<p class="empty">Pas de score de rareté pour cet objet.</p>`;
+  const comps = ["lourdeur","cache","pnj","rares","obscures","loot"].filter(k => typeof r[k] === "number");
+  return `<p><b style="font-size:20px">${typeof r.score==="number" ? r.score.toFixed(3) : esc(r.score)}</b> <span class="meta">/ 1</span></p>
+    <div class="bars">${comps.map(k => `<span>${k}</span><div class="bar"><i style="width:${Math.max(0,Math.min(1,r[k]))*100}%"></i></div><span class="num">${r[k].toFixed(2)}</span>`).join("")}</div>
+    ${r.pourquoi ? `<div class="why">${esc(r.pourquoi)}</div>` : ""}
+    ${runesHtml(e)}`;
+}
+function runesHtml(e){
+  const r = e._rar; if(!r || r.poids_runes == null) return "";
+  if(!r.poids_runes) return `<p class="notice">Aucune caractéristique ne donne de runes : objet non brisable.</p>`;
+  const m = market(e), est = r.kamas_runes_100;
+  const atCoef = m.coef ? ` · à ${m.coef} % ≈ <b>${kfmt(Math.round(est * m.coef / 100))}</b>` : "";
+  let pot = "";
+  if(typeof r.potentiel === "number"){
+    const c = r.potentiel >= 0 ? "--accent" : "--bad";
+    pot = `<div class="pot"><b>Potentiel : <span style="color:var(${c})">${r.potentiel >= 0 ? "+" : ""}${kfmt(r.potentiel)}</span></b> par craft + brisage
+      <span class="meta">= runes ≈ ${kfmt(r.valeur_attendue)} (coef supposé ${r.coef_estime} %) − coût recette ≈ ${kfmt(r.cout_estime)}</span></div>`;
+  } else if(r.une_fois) pot = `<p class="notice">Craftable une seule fois par personnage : pas de potentiel répétable.</p>`;
+  return `<p class="meta" title="Somme des jets moyens × poids de rune. Kamas estimés avec un prix moyen par point de poids calibré sur tes relevés (grossier).">
+    Poids en runes : <b>${esc(r.poids_runes)}</b> · valeur estimée à 100 % ≈ <b>${kfmt(est)}</b>${atCoef}</p>${pot}`;
+}
+
+function hiddenHtml(d, e){
+  const rows = d.hidden[String(e.id)];
+  if(!rows || !rows.length) return "";
+  const CAT = {conditionnee_quete:"Recette liée à une quête", conditionnee_succes:"Recette liée à un succès", echange_pnj:"Obtenu par échange PNJ",
+               ingredient_exclusif:"Ingrédient exclusif", secrete:"Recette secrète", autre:"Condition particulière"};
+  const KIND = {legendary_hunt:"coffre de chasse au trésor légendaire", npc_shop:"échange PNJ", quest_reward:"récompense de quête",
+                achievement_reward:"récompense de succès", container:"coffre", aucune_source:"source inconnue"};
+  return `<h3>Pourquoi la recette est « cachée »</h3>` + rows.map(h => {
+    const ings = (h.exclusive_ingredients || []).map(i => `<li>${esc(i.quantity)}× <b>${esc(i.name)}</b> — ${esc(KIND[i.kind] || i.kind)}</li>`).join("");
+    const links = (h.sources || []).filter(u => /^https?:/.test(u)).map(u => `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(new URL(u).hostname)}</a>`).join(" · ");
+    return `<p><span class="badge hid">${esc(CAT[h.category] || h.category)}</span> <span class="meta">confiance ${esc(h.confidence || "?")}</span>
+      ${h.une_fois_par_personnage ? ` <span class="badge leg">1 fois par personnage</span>` : ""}</p>
+      ${ings ? `<ul class="plain">${ings}</ul>` : ""}
+      <p class="meta">${esc(h.detail || "")}</p>${links ? `<p class="meta">Sources : ${links}</p>` : ""}`;
+  }).join("<hr>");
+}
+
+function crossHtml(kind, obj){
+  const m = INDEX.cross && INDEX.cross[kind + ":" + norm(obj.name)];
+  if(!m) return "";
+  const tabs = INDEX.all.filter(x => m[x.key]).map(x => (m[x.key]||[]).map((id,i) => {
+    const cur = x.key === st.v && String(id) === String(obj.id);
+    const l = esc(x.label) + (m[x.key].length > 1 ? ` #${i+1}` : "");
+    return cur ? `<button class="on" disabled>${l}</button>` : `<button data-go="#/${x.key}/${kind}/${esc(id)}">${l}</button>`;
+  }).join("")).join("");
+  return `<div class="tabs" title="Même nom dans d'autres versions">${tabs}</div>`;
+}
+
+// "90k" -> 90000, "1.2m" -> 1200000, "286%" -> 286
+function parseNum(v){
+  if(v == null || v === "") return null;
+  const m = String(v).trim().toLowerCase().replace(/\s/g, "").replace(",", ".").match(/^(-?\d+(?:\.\d+)?)([km%]?)$/);
+  if(!m) return null;
+  return Math.round(+m[1] * ({k:1e3, m:1e6}[m[2]] || 1));
+}
+const kfmt = n => n == null ? "?" : Math.abs(n) >= 1e6 ? (n/1e6).toFixed(2).replace(/\.?0+$/,"") + "M" : Math.abs(n) >= 1e3 ? Math.round(n/1e3) + "k" : String(n);
+// relevé de marché : saisie perso en priorité, sinon data/feedback/market_<version>.json
+function market(e){
+  const u = uget(st.v, "e", e.id), f = e.market || {};
+  return {coef: u.coef ?? f.coef ?? null, buy: u.buy ?? f.buy ?? null, runes: u.runes ?? f.runes ?? null,
+          fromFile: u.coef == null && u.buy == null && u.runes == null && !!e.market};
+}
+
+function userHtml(kind, id){
+  const u = uget(st.v, kind, id);
+  const vb = (val, l, cls) => `<button data-verdict="${val}" class="${u.verdict===val?"on "+cls:""}">${l}</button>`;
+  return `<h3>Mes notes</h3>
+    <div class="row" style="flex-wrap:wrap;gap:8px">
+      <button id="dStar" class="${u.fav?"on":""}">${u.fav?"★ Favori":"☆ Ajouter aux favoris"}</button>
+      ${kind==="e" ? `<span class="seg verdict" title="Verdict de rareté">${vb("rare","rare","rare")}${vb("commun","commun","commun")}${vb("?","?","")}</span>` : ""}
+    </div>
+    ${kind==="e" ? marketInputs(id) : ""}
+    <textarea id="dNote" placeholder="Note libre (enregistrée automatiquement)" style="margin-top:8px">${esc(u.note||"")}</textarea>
+    <p class="meta" id="dSaved" style="font-size:12px;margin:2px 0 0">${u.updated ? "Modifié le " + new Date(u.updated).toLocaleString("fr-FR") : ""}</p>`;
+}
+
+function marketInputs(id){
+  const e = DB[st.v].eqById.get(String(id)), m = market(e);
+  const inp = (k, label, ph) => `<label class="mk"><span>${label}</span><input data-mk="${k}" placeholder="${ph}" value="${m[k] == null ? "" : k === "coef" ? m[k] : kfmt(m[k])}"></label>`;
+  return `<div class="mkrow">${inp("coef","Taux de brisage (%)","ex. 286")}${inp("buy","Prix d'achat","ex. 90k")}${inp("runes","Valeur des runes","ex. 170k")}</div>
+    <p class="meta" id="dMarge" style="font-size:12px;margin:2px 0 0">${margeText(m)}</p>`;
+}
+function margeText(m){
+  if(m.buy == null || m.runes == null) return m.fromFile ? "Relevé importé (data/feedback)." : "";
+  const marge = m.runes - m.buy;
+  return `Marge : <b style="color:var(${marge >= 0 ? "--accent" : "--bad"})">${marge >= 0 ? "+" : ""}${kfmt(marge)}</b> (${Math.round(m.runes / m.buy * 100)} % du prix d'achat)` + (m.fromFile ? " · relevé importé" : "");
+}
+
+function cmpHtml(e){
+  const cmp = e.cmp || {}, keys = INDEX.all.map(x => x.key).filter(k => cmp[k]);
+  if(!keys.length) return "";
+  const rows = keys.map(k => {
+    const c = cmp[k], lab = esc(vlabel(k));
+    if(c.status === "absent") return `<li><b>${lab}</b> : absent</li>`;
+    const link = `<a href="#/${k}/e/${esc(c.id)}">${esc(c.name)}</a> (niv. ${esc(c.level)})`;
+    let extra = "";
+    if(c.status === "pas_de_recette") extra = ` — recette ${c.recipe_here ? "ici seulement" : c.recipe_there ? "là-bas seulement" : "absente des deux côtés"}`;
+    if(c.diff) extra = `<table class="cmpdiff"><tr><th>Ingrédient</th><th>${esc(vlabel(st.v))}</th><th>${lab}</th></tr>` +
+      c.diff.map(([n,a,b]) => `<tr><td>${esc(n)}</td><td>${a||"—"}</td><td>${b||"—"}</td></tr>`).join("") + `</table>`;
+    return `<li><b>${lab}</b> : ${esc(CMP_LABEL[c.status]||c.status)} — ${link}${extra}</li>`;
+  }).join("");
+  return `<h3>Autres versions</h3><ul class="plain">${rows}</ul>`;
+}
+
+function renderDetail(){
+  const d = DB[st.v], sel = st.sel; if(!d || !sel) return;
+  const p = $("#detail");
+  const obj = (sel.kind === "e" ? d.eqById : d.resById).get(String(sel.id));
+  if(!obj){ p.innerHTML = `<button class="close" data-close>✕</button><p class="notice">Objet ${esc(sel.id)} introuvable dans ${esc(d.label)}.</p>`; p.classList.add("open"); return; }
+  const closeBtn = `<button class="close" data-close aria-label="Fermer">✕</button>`;
+  if(sel.kind === "e"){
+    const e = obj;
+    const badges = [e._hidden&&`<span class="badge hid">recette cachée/conditionnée</span>`, e.secret_recipe&&`<span class="badge hid">secret_recipe</span>`,
+      e._pnj&&`<span class="badge pnj">échange PNJ</span>`, e.legendary&&`<span class="badge leg">légendaire</span>`,
+      e.exchangeable===false&&`<span class="badge">non échangeable</span>`, e.saleable===false&&`<span class="badge">invendable</span>`].filter(Boolean).join(" ");
+    const dbl = d.dblink ? `<a href="${esc(d.dblink.replace("{id}", e.id))}" target="_blank" rel="noopener">Fiche DofusDB ↗</a>` : "";
+    p.innerHTML = `${closeBtn}
+      <div class="dhead">${icon(e.img, e.name, "big")}<div>
+        <h2>${esc(e.name || "(sans nom)")}</h2>
+        <div class="meta">Niveau <b>${esc(e.level)}</b> · ${esc(e.type)}${e.slot && e.slot!==e.type?` (${esc(e.slot)})`:""} · id ${esc(e.id)}</div>
+        ${e.set_id != null && e.set_id !== -1 ? `<div class="meta">Panoplie : ${esc(e.set_name || "#"+e.set_id)}</div>` : ""}
+        <div style="margin-top:4px">${badges}</div>
+        <div class="meta" style="margin-top:4px">${dbl}</div>
+      </div></div>
+      ${crossHtml("e", e)}
+      <h3>Effets</h3>${effectsHtml(e)}
+      <h3>Score de rareté</h3>${rarityHtml(e)}
+      <h3>Recette</h3>${recipeHtml(d, e.recipe)}
+      ${(e.recipe_conditions||[]).length ? `<h3>Conditions de recette</h3><ul class="plain">${condHtml(d, e.recipe_conditions)}</ul>` : ""}
+      <h3>Sources</h3>${sourcesHtml(d, e.sources)}
+      ${cmpHtml(e)}
+      ${e.description ? `<h3>Description</h3><p class="meta">${esc(e.description)}</p>` : ""}
+      ${hiddenHtml(d, e)}
+      ${userHtml("e", e.id)}`;
+  } else {
+    const r = obj, users = d.usedBy.get(String(r.id)) || [], rusers = d.usedByRes.get(String(r.id)) || [];
+    const sortU = [...users].sort((a,b) => a.e.level-b.e.level || a.e.name.localeCompare(b.e.name,"fr"));
+    p.innerHTML = `${closeBtn}
+      <div class="dhead">${icon(r.img, r.name, "big")}<div>
+        <h2>${esc(r.name || "(sans nom)")}</h2>
+        <div class="meta">Niveau <b>${esc(r.level ?? "?")}</b> · ${esc(r.type)} · id ${esc(r.id)}${r.price?` · prix PNJ ${esc(r.price)}`:""}</div>
+        <div class="meta" style="margin-top:4px">Utilisée dans <b>${esc(r.used_in_recipes ?? "?")}</b> recette(s) au total, dont <b>${esc(r.used_in_equipment_recipes ?? "?")}</b> d'équipement${users.length !== r.used_in_equipment_recipes ? ` (${users.length} dans ce jeu de données)` : ""}.</div>
+        ${r._nosrc ? `<div style="margin-top:4px"><span class="badge leg">aucune source connue</span></div>` : ""}
+        ${d.dblink ? `<div class="meta" style="margin-top:4px"><a href="${esc(d.dblink.replace("{id}", r.id))}" target="_blank" rel="noopener">Fiche DofusDB ↗</a></div>` : ""}
+      </div></div>
+      ${crossHtml("r", r)}
+      ${userHtml("r", r.id)}
+      <h3>Sources</h3>${sourcesHtml(d, r.sources)}
+      ${r.recipe && (r.recipe.ingredients||[]).length ? `<h3>Recette (ressource craftée)</h3>${recipeHtml(d, r.recipe)}` : ""}
+      <h3>Équipements qui l'utilisent (${users.length})</h3>
+      ${users.length ? `<table>${sortU.map(({e,q}) => `<tr><td class="num" style="width:44px">${esc(q)}×</td><td><div class="ing">${icon(e.img, e.name, "sm")}<a href="#/${d.key}/e/${esc(e.id)}">${esc(e.name)}</a></div></td><td class="num meta">niv. ${esc(e.level)}</td></tr>`).join("")}</table>` : `<p class="empty">Aucun.</p>`}
+      ${rusers.length ? `<h3>Ressources qui l'utilisent (${rusers.length})</h3><table>${rusers.map(({r:x,q}) => `<tr><td class="num" style="width:44px">${esc(q)}×</td><td><a href="#/${d.key}/r/${esc(x.id)}">${esc(x.name)}</a></td></tr>`).join("")}</table>` : ""}`;
+  }
+  p.classList.add("open");
+  p.scrollTop = 0;
+}
+
+$("#detail").addEventListener("click", ev => {
+  const t = ev.target;
+  if(t.closest("[data-close]")){ history.pushState(null, "", location.pathname + location.search); showEmptyDetail(); return; }
+  const g = t.closest("[data-go]"); if(g){ location.hash = g.dataset.go; return; }
+  const sel = st.sel; if(!sel) return;
+  if(t.id === "dStar"){ const u = uget(st.v, sel.kind, sel.id); uset(st.v, sel.kind, sel.id, {fav:!u.fav}); renderDetail(); renderList(); return; }
+  const vb = t.closest("[data-verdict]");
+  if(vb){ const u = uget(st.v, sel.kind, sel.id); const val = vb.dataset.verdict; uset(st.v, sel.kind, sel.id, {verdict: u.verdict === val ? null : val}); renderDetail(); renderList(); }
+});
+let nT;
+$("#detail").addEventListener("input", ev => {
+  if(ev.target.dataset.mk && st.sel){
+    const sel = st.sel, k = ev.target.dataset.mk, val = parseNum(ev.target.value);
+    clearTimeout(nT); nT = setTimeout(() => {
+      uset(st.v, sel.kind, sel.id, {[k]: val});
+      const e = DB[st.v].eqById.get(String(sel.id)), mEl = $("#dMarge");
+      if(mEl && e) mEl.innerHTML = margeText(market(e));
+      renderList();
+    }, 400);
+    return;
+  }
+  if(ev.target.id !== "dNote" || !st.sel) return;
+  const sel = st.sel, val = ev.target.value;
+  clearTimeout(nT); nT = setTimeout(() => { uset(st.v, sel.kind, sel.id, {note: val}); const s = $("#dSaved"); if(s) s.textContent = "Enregistré"; }, 300);
+});
+
+/* ---------- export / import ---------- */
+$("#btnExport").addEventListener("click", () => {
+  const blob = new Blob([JSON.stringify({app:"encyclopedie-dofus", exported:new Date().toISOString(), entries:USER}, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `dofus-notes-${new Date().toISOString().slice(0,10)}.json`;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+});
+$("#btnImport").addEventListener("click", () => $("#fileImport").click());
+$("#fileImport").addEventListener("change", async ev => {
+  const f = ev.target.files[0]; if(!f) return;
+  try{
+    const j = JSON.parse(await f.text()), entries = j.entries || j;
+    let n = 0;
+    for(const [k, v] of Object.entries(entries)){
+      if(!/^\w+:[er]:/.test(k) || typeof v !== "object") continue;
+      const cur = USER[k];
+      if(!cur || (v.updated||"") >= (cur.updated||"")){ USER[k] = v; n++; }
+    }
+    lsSet(USERKEY, USER);
+    showNotice(`${n} entrée(s) importée(s).`, true);
+    renderList(); if(st.sel) renderDetail();
+  }catch(e){ showNotice("Import impossible : " + e.message); }
+  ev.target.value = "";
+});
+function showNotice(msg, ok){ const n = $("#notice"); n.innerHTML = `<div class="notice" ${ok?'style="background:var(--accent-soft);color:var(--accent)"':""}>${esc(msg)}</div>`; setTimeout(() => n.innerHTML = "", 5000); }
+
+/* ---------- thème ---------- */
+const THEMES = ["auto","light","dark"], TL = {auto:"auto",light:"clair",dark:"sombre"};
+function applyTheme(t){ if(t === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.dataset.theme = t; $("#btnTheme").textContent = "Thème : " + TL[t]; }
+let theme = lsGet("de.theme", "auto"); if(!THEMES.includes(theme)) theme = "auto"; applyTheme(theme);
+$("#btnTheme").addEventListener("click", () => { theme = THEMES[(THEMES.indexOf(theme)+1) % 3]; lsSet("de.theme", theme); applyTheme(theme); });
+
+/* ---------- démarrage ---------- */
+document.addEventListener("keydown", ev => {
+  if(ev.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA"){ ev.preventDefault(); $("#q").focus(); }
+  if(ev.key === "Escape" && $("#detail").classList.contains("open") && window.innerWidth <= 1100){ showEmptyDetail(); }
+});
+(async function init(){
+  if(!INDEX.versions.length){
+    renderVersions();
+    $("#results").innerHTML = `<div class="notice">Aucune donnée trouvée. Lance <code>python3 ui/build.py</code> depuis le dossier du projet, puis recharge la page.</div>`;
+    return;
+  }
+  const hm = location.hash.match(/^#\/(\w+)\//);
+  const avail = INDEX.versions.map(x => x.key);
+  let v = hm && avail.includes(hm[1]) ? hm[1] : st.v;
+  if(!avail.includes(v)) v = avail.includes("dofus3") ? "dofus3" : avail[avail.length-1];
+  st.view === "grid" ? ($("#vGrid").classList.add("on"), $("#vList").classList.remove("on")) : null;
+  await switchVersion(v, () => {});
+  onHash();
+})();
+</script>
+</body>
+</html>
